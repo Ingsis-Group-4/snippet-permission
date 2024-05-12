@@ -2,6 +2,8 @@ package app.permission.service
 
 import app.permission.model.dto.CreateSnippetInput
 import app.permission.model.dto.ShareSnippetInput
+import app.permission.model.dto.SnippetOutput
+import app.permission.model.enums.PermissionTypeInput
 import app.permission.persistance.entity.Snippet
 import app.permission.persistance.entity.SnippetShare
 import app.permission.persistance.repository.SnippetRepository
@@ -26,5 +28,39 @@ class PermissionService {
         val shares = input.userIds.stream().map { SnippetShare(it, snippet) }.toList()
 
         snippetShareRepository?.saveAll(shares)
+    }
+
+    fun getAllSnippets(
+        userId: String,
+        permissionTypeInput: PermissionTypeInput?,
+    ): List<SnippetOutput> {
+        val permissionType = permissionTypeInput ?: PermissionTypeInput.ALL
+
+        val snippets: List<SnippetOutput> =
+            when (permissionType) {
+                PermissionTypeInput.OWNED -> {
+                    getOwnedSnippets(userId)
+                }
+
+                PermissionTypeInput.SHARED -> {
+                    getSharedSnippets(userId)
+                }
+
+                PermissionTypeInput.ALL -> {
+                    getOwnedSnippets(userId) + getSharedSnippets(userId)
+                }
+            }
+
+        return snippets
+    }
+
+    private fun getOwnedSnippets(userId: String): List<SnippetOutput> {
+        val snippets = snippetRepository?.findAllByUserId(userId) ?: listOf()
+        return snippets.stream().map { SnippetOutput(it.name, it.snippetKey) }.toList()
+    }
+
+    private fun getSharedSnippets(userId: String): List<SnippetOutput> {
+        val snippets = snippetShareRepository?.findAllSharedSnippetsByUserId(userId) ?: listOf()
+        return snippets.stream().map { SnippetOutput(it.name, it.snippetKey) }.toList()
     }
 }
