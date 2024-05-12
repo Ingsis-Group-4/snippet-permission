@@ -7,4 +7,6 @@ interface SnippetRepository : JpaRepository<Snippet, String> {
     fun findBySnippetKey(snippetKey: String): Snippet?
 
     fun findAllByUserId(userId: String): List<Snippet>
+
+    fun existsBySnippetKey(snippetKey: String): Boolean
 }

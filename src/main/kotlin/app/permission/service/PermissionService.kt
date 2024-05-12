@@ -9,7 +9,9 @@ import app.permission.persistance.entity.SnippetShare
 import app.permission.persistance.repository.SnippetRepository
 import app.permission.persistance.repository.SnippetShareRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 
 @Service
 class PermissionService {
@@ -20,6 +22,12 @@ class PermissionService {
     val snippetShareRepository: SnippetShareRepository? = null
 
     fun createSnippet(input: CreateSnippetInput) {
+        if (snippetKeyExists(input.snippetKey)) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Snippet with snippet key ${input.snippetKey} already exists",
+            )
+        }
         snippetRepository?.save(Snippet(input.name, input.snippetKey, input.userId))
     }
 
@@ -62,5 +70,9 @@ class PermissionService {
     private fun getSharedSnippets(userId: String): List<SnippetOutput> {
         val snippets = snippetShareRepository?.findAllSharedSnippetsByUserId(userId) ?: listOf()
         return snippets.stream().map { SnippetOutput(it.name, it.snippetKey) }.toList()
+    }
+
+    private fun snippetKeyExists(snippetKey: String): Boolean {
+        return snippetRepository?.existsBySnippetKey(snippetKey) ?: false
     }
 }
