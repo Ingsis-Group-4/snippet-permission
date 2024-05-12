@@ -22,17 +22,17 @@ class PermissionService {
     val snippetShareRepository: SnippetShareRepository? = null
 
     fun createSnippet(input: CreateSnippetInput) {
-        if (snippetKeyExists(input.snippetKey)) {
+        if (snippetKeyExists(input.snippetKey!!)) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Snippet with snippet key ${input.snippetKey} already exists",
             )
         }
-        snippetRepository?.save(Snippet(input.name, input.snippetKey, input.userId))
+        snippetRepository?.save(Snippet(input.name!!, input.snippetKey, input.userId!!))
     }
 
     fun shareSnippet(input: ShareSnippetInput) {
-        val snippet = snippetRepository?.findBySnippetKey(input.snippetKey)
+        val snippet = snippetRepository?.findBySnippetKey(input.snippetKey!!)
         val shares = input.userIds.stream().map { SnippetShare(it, snippet) }.toList()
 
         snippetShareRepository?.saveAll(shares)
