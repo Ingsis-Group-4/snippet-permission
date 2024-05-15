@@ -14,13 +14,10 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
 @Service
-class PermissionService {
-    @Autowired
-    val snippetRepository: SnippetRepository? = null
-
-    @Autowired
-    val snippetShareRepository: SnippetShareRepository? = null
-
+class PermissionService(
+    @Autowired val snippetRepository: SnippetRepository,
+    @Autowired val snippetShareRepository: SnippetShareRepository,
+) {
     fun createSnippet(input: CreateSnippetInput) {
         if (snippetKeyExists(input.snippetKey!!)) {
             throw ResponseStatusException(
@@ -28,14 +25,14 @@ class PermissionService {
                 "Snippet with snippet key ${input.snippetKey} already exists",
             )
         }
-        snippetRepository?.save(Snippet(input.name!!, input.snippetKey, input.userId!!))
+        snippetRepository.save(Snippet(input.name!!, input.snippetKey, input.userId!!))
     }
 
     fun shareSnippet(input: ShareSnippetInput) {
-        val snippet = snippetRepository?.findBySnippetKey(input.snippetKey!!)
+        val snippet = snippetRepository.findBySnippetKey(input.snippetKey!!)
         val shares = input.userIds.stream().map { SnippetShare(it, snippet) }.toList()
 
-        snippetShareRepository?.saveAll(shares)
+        snippetShareRepository.saveAll(shares)
     }
 
     fun getAllSnippets(
@@ -63,16 +60,16 @@ class PermissionService {
     }
 
     private fun getOwnedSnippets(userId: String): List<SnippetOutput> {
-        val snippets = snippetRepository?.findAllByUserId(userId) ?: listOf()
+        val snippets = snippetRepository.findAllByUserId(userId)
         return snippets.stream().map { SnippetOutput(it.name, it.snippetKey) }.toList()
     }
 
     private fun getSharedSnippets(userId: String): List<SnippetOutput> {
-        val snippets = snippetShareRepository?.findAllSharedSnippetsByUserId(userId) ?: listOf()
+        val snippets = snippetShareRepository.findAllSharedSnippetsByUserId(userId)
         return snippets.stream().map { SnippetOutput(it.name, it.snippetKey) }.toList()
     }
 
     private fun snippetKeyExists(snippetKey: String): Boolean {
-        return snippetRepository?.existsBySnippetKey(snippetKey) ?: false
+        return snippetRepository.existsBySnippetKey(snippetKey)
     }
 }

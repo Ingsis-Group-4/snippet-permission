@@ -22,30 +22,31 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("permission")
 @Validated
-class PermissionController {
-    @Autowired
-    val permissionService: PermissionService? = null
-
+class PermissionController(
+    @Autowired val permissionService: PermissionService,
+) {
     @PostMapping("snippet/create")
     fun createSnippet(
         @Valid @RequestBody input: CreateSnippetInput,
-    ) {
-        permissionService?.createSnippet(input)
+    ): ResponseEntity<Unit> {
+        permissionService.createSnippet(input)
+        return ResponseEntity.ok().build()
     }
 
     @PostMapping("snippet/share")
     fun shareSnippet(
         @RequestBody input: ShareSnippetInput,
-    ) {
-        permissionService?.shareSnippet(input)
+    ): ResponseEntity<Unit> {
+        permissionService.shareSnippet(input)
+        return ResponseEntity.ok().build()
     }
 
     @GetMapping("snippet/all/{userId}")
     fun getAllSnippets(
         @RequestParam("type") permissionTypeInput: PermissionTypeInput?,
         @PathVariable userId: String,
-    ): List<SnippetOutput> {
-        return permissionService?.getAllSnippets(userId, permissionTypeInput) ?: listOf()
+    ): ResponseEntity<List<SnippetOutput>> {
+        return ResponseEntity.ok(permissionService.getAllSnippets(userId, permissionTypeInput))
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
