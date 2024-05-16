@@ -30,7 +30,7 @@ jobs:
         with:
           push: true
           tags: |
-            ghcr.io/Ingsis-Group-4/snippet-permission:${{ steps.short-sha.outputs.sha }}
+            ghcr.io/Ingsis-Group-4/snippet-permission-dev:${{ steps.short-sha.outputs.sha }}
 
     env:
       GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
