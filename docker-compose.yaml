@@ -1,7 +1,7 @@
 version: '3'
 services:
-  api:
-    container_name: "compose-api"
+  snippet-permission:
+    container_name: "snippet-permission"
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,7 +12,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB}
       DB_HOST: postgres
-      DB_PORT: ${DB_PORT}
+      DB_PORT: 5432
     env_file:
       - .env
     depends_on:
@@ -20,7 +20,8 @@ services:
     expose:
       - "8080"
   postgres:
-    image: postgres:latest
+    container_name: "permission-db"
+    image: postgres:alpine
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}

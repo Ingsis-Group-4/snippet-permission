@@ -1,4 +1,4 @@
-package entity
+package app.permission.persistance.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.GeneratedValue
