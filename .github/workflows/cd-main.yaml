@@ -32,4 +32,4 @@ jobs:
         with:
           push: true
           tags: |
-            ghcr.io/ingsis-group-4/snippet-permission-dev:${{ steps.short-sha.outputs.sha }}
+            ghcr.io/ingsis-group-4/snippet-permission-main:${{ steps.short-sha.outputs.sha }}
