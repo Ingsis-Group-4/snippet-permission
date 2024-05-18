@@ -1,4 +1,4 @@
-name: "Continuous Deployment to dev"
+name: "Continuous Deployment to main"
 on:
   push:
     branches:
