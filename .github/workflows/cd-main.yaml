@@ -1,8 +1,8 @@
-name: "Continuous Deployment to dev"
+name: "Continuous Deployment to main"
 on:
   push:
     branches:
-      - dev
+      - main
   workflow_dispatch:
 
 jobs:
@@ -31,7 +31,5 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/ingsis-group-4/snippet-permission-dev:latest
-            ghcr.io/ingsis-group-4/snippet-permission-dev:${{ steps.short-sha.outputs.sha }}
+            ghcr.io/ingsis-group-4/snippet-permission-main:${{ steps.short-sha.outputs.sha }}
