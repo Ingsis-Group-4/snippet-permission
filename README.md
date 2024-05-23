@@ -9,4 +9,4 @@ This web app provides and Rest API to manage snippet permissions
 
 ### Docs
 
-Run the app and enter `http://localhost:8080/swagger-ui/index.html#` to see available endpoints
+Run the app and enter `http://localhost:8080/swagger-ui.html` to see available endpoints
