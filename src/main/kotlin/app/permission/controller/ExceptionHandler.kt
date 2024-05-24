@@ -1,4 +1,4 @@
-package app.permission
+package app.permission.controller
 
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
