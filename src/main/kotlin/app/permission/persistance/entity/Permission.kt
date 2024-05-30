@@ -5,9 +5,10 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 
 @Entity
-data class SnippetShare(
+data class Permission(
+    val snippetId: String,
     val userId: String,
-    @ManyToOne()
-    @JoinColumn(name = "snippet_id", nullable = false)
-    val snippet: Snippet? = null,
+    @ManyToOne
+    @JoinColumn(name = "permission_type_id")
+    val permissionType: PermissionType,
 ) : BaseEntity()

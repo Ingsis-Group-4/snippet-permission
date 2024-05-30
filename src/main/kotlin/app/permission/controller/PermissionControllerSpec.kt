@@ -1,64 +1,50 @@
 package app.permission.controller
 
 import app.permission.model.dto.CreateSnippetInput
-import app.permission.model.dto.ShareSnippetInput
-import app.permission.model.dto.SnippetOutput
-import app.permission.model.enums.PermissionTypeInput
+import app.permission.model.dto.PermissionOutput
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 
 @RequestMapping("permission")
 interface PermissionControllerSpec {
-    @PostMapping("snippet/create")
+    @PostMapping("create")
     @Operation(
         summary = "Create a snippet permission",
         requestBody = RequestBody(content = [Content(schema = Schema(implementation = CreateSnippetInput::class))]),
-        // TODO: Add error cases
         responses = [
             ApiResponse(
                 responseCode = "200",
+            ),
+            ApiResponse(
+                responseCode = "404",
+                ref = "Permission Type not found",
+            ),
+            ApiResponse(
+                responseCode = "409",
+                ref = "User has already a permission type for that snippet",
             ),
         ],
     )
     fun createSnippet(input: CreateSnippetInput): ResponseEntity<Unit>
 
-    @PostMapping("snippet/share")
+    @GetMapping("all/{userId}")
     @Operation(
-        summary = "Share a snippet with another user",
-        requestBody = RequestBody(content = [Content(schema = Schema(implementation = ShareSnippetInput::class))]),
-        // TODO: Add error cases
+        summary = "Get all permissions from a user",
         responses = [
             ApiResponse(
                 responseCode = "200",
             ),
         ],
     )
-    fun shareSnippet(input: ShareSnippetInput): ResponseEntity<Unit>
-
-    @GetMapping("snippet/all/{userId}")
-    @Operation(
-        summary = "Get all snippets keys for my users",
-        parameters = [
-            Parameter(name = "userId", `in` = ParameterIn.PATH, required = true, schema = Schema(type = "string")),
-            Parameter(
-                name = "type",
-                description = "One of OWNED, SHARED or ALL. Default is OWNED",
-                required = false,
-                schema = Schema(implementation = PermissionTypeInput::class),
-            ),
-        ],
-    )
-    fun getAllSnippets(
-        permissionTypeInput: PermissionTypeInput?,
-        userId: String,
-    ): ResponseEntity<List<SnippetOutput>>
+    fun getAllUserPermissions(
+        @PathVariable("userId") userId: String,
+    ): List<PermissionOutput>
 }

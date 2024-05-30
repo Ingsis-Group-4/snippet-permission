@@ -1,6 +1,8 @@
 package app.permission.model.dto
 
-data class SnippetOutput(
-    val name: String,
-    val snippetKey: String,
+data class PermissionOutput(
+    val id: String,
+    val snippetId: String,
+    val userId: String,
+    val permissionType: String,
 )
