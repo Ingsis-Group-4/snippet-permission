@@ -49,4 +49,8 @@ class PermissionService
             val permission = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
             return !permission.isEmpty
         }
+
+        fun deleteAllPermissionsForSnippet(snippetId: String) {
+            permissionRepository.deleteAllBySnippetId(snippetId)
+        }
     }

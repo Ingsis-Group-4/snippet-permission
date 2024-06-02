@@ -11,4 +11,6 @@ interface PermissionRepository : JpaRepository<Permission, String> {
         userId: String,
         snippetId: String,
     ): Optional<Permission>
+
+    fun deleteAllBySnippetId(snippetId: String)
 }
