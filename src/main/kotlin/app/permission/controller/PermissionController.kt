@@ -1,6 +1,6 @@
 package app.permission.controller
 
-import app.permission.model.dto.CreateSnippetInput
+import app.permission.model.dto.CreatePermissionInput
 import app.permission.model.dto.PermissionOutput
 import app.permission.service.PermissionService
 import jakarta.validation.Valid
@@ -14,7 +14,7 @@ class PermissionController(
     @Autowired val permissionService: PermissionService,
 ) : PermissionControllerSpec {
     override fun createSnippet(
-        @Valid @RequestBody input: CreateSnippetInput,
+        @Valid @RequestBody input: CreatePermissionInput,
     ): ResponseEntity<Unit> {
         permissionService.createPermission(input)
         return ResponseEntity.ok().build()
