@@ -11,4 +11,10 @@ interface PermissionRepository : JpaRepository<Permission, String> {
         userId: String,
         snippetId: String,
     ): Optional<Permission>
+
+    @Suppress("ktlint:standard:function-naming")
+    fun getByPermissionType_TypeAndSnippetId(
+        type: String,
+        snippetId: String,
+    ): Permission
 }

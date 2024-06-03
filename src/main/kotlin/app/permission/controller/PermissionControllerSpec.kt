@@ -1,6 +1,6 @@
 package app.permission.controller
 
-import app.permission.model.dto.CreateSnippetInput
+import app.permission.model.dto.CreatePermissionInput
 import app.permission.model.dto.PermissionOutput
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -18,7 +18,7 @@ interface PermissionControllerSpec {
     @PostMapping("create")
     @Operation(
         summary = "Create a snippet permission",
-        requestBody = RequestBody(content = [Content(schema = Schema(implementation = CreateSnippetInput::class))]),
+        requestBody = RequestBody(content = [Content(schema = Schema(implementation = CreatePermissionInput::class))]),
         responses = [
             ApiResponse(
                 responseCode = "200",
@@ -33,7 +33,7 @@ interface PermissionControllerSpec {
             ),
         ],
     )
-    fun createSnippet(input: CreateSnippetInput): ResponseEntity<Unit>
+    fun createSnippet(input: CreatePermissionInput): ResponseEntity<Unit>
 
     @GetMapping("all/{userId}")
     @Operation(

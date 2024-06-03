@@ -2,7 +2,7 @@ package app.permission.model.dto
 
 import jakarta.validation.constraints.NotBlank
 
-data class CreateSnippetInput(
+data class CreatePermissionInput(
     @field:NotBlank(message = "Snippet id must not be blank")
     val snippetId: String?,
     @field:NotBlank(message = "User Id must not be blank")

@@ -2,7 +2,7 @@ package app.permission.service
 
 import app.permission.exception.PermissionTypeNotFound
 import app.permission.exception.UserAlreadyHasPermission
-import app.permission.model.dto.CreateSnippetInput
+import app.permission.model.dto.CreatePermissionInput
 import app.permission.model.dto.PermissionOutput
 import app.permission.persistance.entity.Permission
 import app.permission.persistance.repository.PermissionRepository
@@ -17,7 +17,7 @@ class PermissionService
         private val permissionRepository: PermissionRepository,
         private val permissionTypeRepository: PermissionTypeRepository,
     ) {
-        fun createPermission(input: CreateSnippetInput) {
+        fun createPermission(input: CreatePermissionInput) {
             if (hasPermissionForSnippet(input.userId!!, input.snippetId!!)) {
                 throw UserAlreadyHasPermission()
             }
@@ -39,7 +39,14 @@ class PermissionService
 
         fun getAllUserPermissions(userId: String): List<PermissionOutput> {
             val permissionEntities = permissionRepository.findAllByUserId(userId)
-            return permissionEntities.map { PermissionOutput(it.id!!, it.snippetId, it.userId, it.permissionType.type) }
+
+            val authorType = permissionTypeRepository.findByType("OWNER").get()
+
+            return permissionEntities.map {
+                val authorPermission =
+                    this.permissionRepository.getByPermissionType_TypeAndSnippetId(authorType.type, it.snippetId)
+                PermissionOutput(it.id!!, it.snippetId, authorPermission.userId, it.permissionType.type)
+            }
         }
 
         private fun hasPermissionForSnippet(
