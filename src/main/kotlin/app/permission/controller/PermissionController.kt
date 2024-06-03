@@ -3,7 +3,6 @@ package app.permission.controller
 import app.permission.model.dto.CreateSnippetInput
 import app.permission.model.dto.PermissionOutput
 import app.permission.service.PermissionService
-import jakarta.transaction.Transactional
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -25,7 +24,6 @@ class PermissionController(
         return permissionService.getAllUserPermissions(userId)
     }
 
-    @Transactional
     override fun deleteAllPermissionsForSnippet(snippetId: String): ResponseEntity<Unit> {
         permissionService.deleteAllPermissionsForSnippet(snippetId)
         return ResponseEntity.ok().build()
