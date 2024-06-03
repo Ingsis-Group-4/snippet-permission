@@ -12,6 +12,8 @@ interface PermissionRepository : JpaRepository<Permission, String> {
         snippetId: String,
     ): Optional<Permission>
 
+    fun deleteAllBySnippetId(snippetId: String)
+
     @Suppress("ktlint:standard:function-naming")
     fun getByPermissionType_TypeAndSnippetId(
         type: String,
