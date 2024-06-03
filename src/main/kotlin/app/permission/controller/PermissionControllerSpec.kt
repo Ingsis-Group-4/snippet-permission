@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -47,4 +48,9 @@ interface PermissionControllerSpec {
     fun getAllUserPermissions(
         @PathVariable("userId") userId: String,
     ): List<PermissionOutput>
+
+    @DeleteMapping("all/{snippetId}")
+    fun deleteAllPermissionsForSnippet(
+        @PathVariable("snippetId") snippetId: String,
+    ): ResponseEntity<Unit>
 }

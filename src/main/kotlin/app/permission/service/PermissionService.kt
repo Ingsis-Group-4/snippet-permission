@@ -7,6 +7,7 @@ import app.permission.model.dto.PermissionOutput
 import app.permission.persistance.entity.Permission
 import app.permission.persistance.repository.PermissionRepository
 import app.permission.persistance.repository.PermissionTypeRepository
+import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -48,5 +49,10 @@ class PermissionService
         ): Boolean {
             val permission = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
             return !permission.isEmpty
+        }
+
+        @Transactional
+        fun deleteAllPermissionsForSnippet(snippetId: String) {
+            permissionRepository.deleteAllBySnippetId(snippetId)
         }
     }

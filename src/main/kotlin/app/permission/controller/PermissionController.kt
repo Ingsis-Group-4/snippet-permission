@@ -23,4 +23,9 @@ class PermissionController(
     override fun getAllUserPermissions(userId: String): List<PermissionOutput> {
         return permissionService.getAllUserPermissions(userId)
     }
+
+    override fun deleteAllPermissionsForSnippet(snippetId: String): ResponseEntity<Unit> {
+        permissionService.deleteAllPermissionsForSnippet(snippetId)
+        return ResponseEntity.ok().build()
+    }
 }
