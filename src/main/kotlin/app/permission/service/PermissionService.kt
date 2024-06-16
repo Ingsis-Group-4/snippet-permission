@@ -62,4 +62,10 @@ class PermissionService
         fun deleteAllPermissionsForSnippet(snippetId: String) {
             permissionRepository.deleteAllBySnippetId(snippetId)
         }
+
+        fun getAuthorFromSnippetId(snippetId: String): String {
+            val authorType = permissionTypeRepository.findByType("OWNER").get()
+            val authorPermission = permissionRepository.getByPermissionType_TypeAndSnippetId(authorType.type, snippetId)
+            return authorPermission.userId
+        }
     }
