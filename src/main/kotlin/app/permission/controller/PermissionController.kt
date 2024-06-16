@@ -28,4 +28,8 @@ class PermissionController(
         permissionService.deleteAllPermissionsForSnippet(snippetId)
         return ResponseEntity.ok().build()
     }
+
+    override fun getAuthorFromSnippetId(snippetId: String): String {
+        return permissionService.getAuthorFromSnippetId(snippetId)
+    }
 }

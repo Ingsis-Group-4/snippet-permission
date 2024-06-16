@@ -53,4 +53,17 @@ interface PermissionControllerSpec {
     fun deleteAllPermissionsForSnippet(
         @PathVariable("snippetId") snippetId: String,
     ): ResponseEntity<Unit>
+
+    @GetMapping("author/{snippetId}")
+    @Operation(
+        summary = "Get the author of a snippet",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+            ),
+        ],
+    )
+    fun getAuthorFromSnippetId(
+        @PathVariable("snippetId") snippetId: String,
+    ): String
 }
