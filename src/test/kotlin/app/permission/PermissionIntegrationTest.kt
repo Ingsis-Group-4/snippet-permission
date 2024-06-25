@@ -1,5 +1,6 @@
 package app.permission
 
+import app.common.TestSecurityConfig
 import app.permission.model.dto.CreatePermissionInput
 import app.permission.persistance.entity.Permission
 import app.permission.persistance.entity.PermissionType
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -22,7 +24,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
+@SpringBootTest(classes = [TestSecurityConfig::class])
 @ExtendWith(SpringExtension::class)
 @AutoConfigureMockMvc
 @WithMockUser(username = "user", authorities = ["SCOPE_write:snippets"])
@@ -166,5 +168,31 @@ class PermissionIntegrationTest {
 
         Assertions.assertTrue(result1.isEmpty)
         Assertions.assertTrue(result2.isEmpty)
+    }
+
+    @Test
+    fun `test 005 _ get all user's permissions`() {
+        val createPermissionRequestBody =
+            CreatePermissionInput(
+                "0012",
+                "002",
+                TEST_PERMISSION_TYPE,
+            )
+//                        .header(HttpHeaders.AUTHORIZATION, "Bearer token")
+
+        val requestBody = objectMapper.writeValueAsString(createPermissionRequestBody)
+
+        // Execution
+        mockMvc.perform(
+            post("$base/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody),
+        ).andExpect(status().isOk)
+
+        // Execution
+        mockMvc.perform(
+            get("$base/all?page_num=0&page_size=10")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token")
+        ).andExpect(status().isOk)
     }
 }
