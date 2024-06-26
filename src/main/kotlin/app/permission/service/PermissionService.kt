@@ -3,6 +3,7 @@ package app.permission.service
 import app.permission.exception.PermissionTypeNotFound
 import app.permission.exception.UserAlreadyHasPermission
 import app.permission.model.dto.CreatePermissionInput
+import app.permission.model.dto.PermissionListOutput
 import app.permission.model.dto.PermissionOutput
 import app.permission.persistance.entity.Permission
 import app.permission.persistance.repository.PermissionRepository
@@ -10,6 +11,7 @@ import app.permission.persistance.repository.PermissionTypeRepository
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
 @Service
@@ -36,6 +38,7 @@ class PermissionService
                 logger.error("Permission type with type: ${input.permissionType} not found")
                 throw PermissionTypeNotFound()
             }
+
             permissionRepository.save(
                 Permission(
                     input.snippetId,
@@ -46,18 +49,27 @@ class PermissionService
             logger.info("Permission created for user with id: ${input.userId} and snippet with id: ${input.snippetId}")
         }
 
-        fun getAllUserPermissions(userId: String): List<PermissionOutput> {
+        fun getAllUserPermissions(
+            userId: String,
+            pageNum: Int,
+            pageSize: Int,
+        ): PermissionListOutput {
             logger.info("Request received for getting all permissions for user with id: $userId")
-            val permissionEntities = permissionRepository.findAllByUserId(userId)
+            val pagination = PageRequest.of(pageNum, pageSize)
+            val permissionEntities = permissionRepository.findAllByUserId(userId, pagination)
+            val userPermissionTotalCount = permissionRepository.countAllByUserId(userId)
 
             val authorType = permissionTypeRepository.findByType("OWNER").get()
-
             logger.info("Returning all permissions for user with id: $userId")
-            return permissionEntities.map {
-                val authorPermission =
-                    this.permissionRepository.getByPermissionType_TypeAndSnippetId(authorType.type, it.snippetId)
-                PermissionOutput(it.id!!, it.snippetId, authorPermission.userId, it.permissionType.type)
-            }
+
+            val permissionOutputs =
+                permissionEntities.map {
+                    val authorPermission =
+                        this.permissionRepository.getByPermissionType_TypeAndSnippetId(authorType.type, it.snippetId)
+                    PermissionOutput(it.id!!, it.snippetId, authorPermission.userId, it.permissionType.type)
+                }
+
+            return PermissionListOutput(permissionOutputs, userPermissionTotalCount)
         }
 
         private fun hasPermissionForSnippet(

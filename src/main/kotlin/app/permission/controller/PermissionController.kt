@@ -1,11 +1,12 @@
 package app.permission.controller
 
 import app.permission.model.dto.CreatePermissionInput
-import app.permission.model.dto.PermissionOutput
+import app.permission.model.dto.PermissionListOutput
 import app.permission.service.PermissionService
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
@@ -20,8 +21,12 @@ class PermissionController(
         return ResponseEntity.ok().build()
     }
 
-    override fun getAllUserPermissions(userId: String): List<PermissionOutput> {
-        return permissionService.getAllUserPermissions(userId)
+    override fun getAllUserPermissions(
+        jwt: Jwt,
+        pageNum: Int,
+        pageSize: Int,
+    ): PermissionListOutput {
+        return permissionService.getAllUserPermissions(jwt.subject, pageNum, pageSize)
     }
 
     override fun deleteAllPermissionsForSnippet(snippetId: String): ResponseEntity<Unit> {

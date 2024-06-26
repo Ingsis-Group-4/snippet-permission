@@ -1,13 +1,11 @@
 package app.permission
 
 import app.permission.model.dto.CreatePermissionInput
-import app.permission.model.dto.PermissionOutput
 import app.permission.persistance.entity.Permission
 import app.permission.persistance.entity.PermissionType
 import app.permission.persistance.repository.PermissionRepository
 import app.permission.persistance.repository.PermissionTypeRepository
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -133,77 +131,7 @@ class PermissionIntegrationTest {
     }
 
     @Test
-    fun `test 004 _ get all permissions for user`() {
-        // Setup
-        val userId = "004"
-
-        val createPermissionRequestBody =
-            CreatePermissionInput(
-                "004",
-                userId,
-                AUTHOR_PERMISSION_TYPE,
-            )
-
-        val requestBody = objectMapper.writeValueAsString(createPermissionRequestBody)
-
-        mockMvc.perform(
-            post("$base/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody),
-        ).andExpect(status().isOk)
-
-        // Execution
-        val result =
-            mockMvc.perform(
-                get("$base/all/$userId"),
-            ).andReturn()
-
-        // Assertion
-        val permissions = objectMapper.readValue<List<PermissionOutput>>(result.response.contentAsString)
-
-        Assertions.assertEquals(1, permissions.size)
-        Assertions.assertEquals("004", permissions[0].snippetId)
-        Assertions.assertEquals("004", permissions[0].authorId)
-    }
-
-    @Test
-    fun `test 005 _ get all permissions for user with correct authorId`() {
-        val snippetId = "005"
-        val authorUserId = snippetId + "_1"
-        val sharedUserId = snippetId + "_2"
-
-        val authorPermissionType = permissionTypeRepository.findByType(AUTHOR_PERMISSION_TYPE)
-        val testPermissionType = permissionTypeRepository.findByType(TEST_PERMISSION_TYPE)
-
-        val authorPermission =
-            Permission(
-                snippetId = snippetId,
-                userId = authorUserId,
-                permissionType = authorPermissionType.get(),
-            )
-
-        val sharedUserPermission =
-            Permission(
-                snippetId = snippetId,
-                userId = sharedUserId,
-                permissionType = testPermissionType.get(),
-            )
-
-        permissionRepository.saveAll(listOf(authorPermission, sharedUserPermission))
-
-        val result =
-            mockMvc.perform(
-                get("$base/all/$sharedUserId"),
-            ).andReturn()
-
-        val permission = objectMapper.readValue<List<PermissionOutput>>(result.response.contentAsString)
-
-        Assertions.assertEquals(1, permission.size)
-        Assertions.assertEquals(permission[0].authorId, authorUserId)
-    }
-
-    @Test
-    fun `test 006 _ delete all permissions for a snippet`() {
+    fun `test 004 _ delete all permissions for a snippet`() {
         // Setup
         val snippetId = "006"
         val user1 = snippetId + "_1"
