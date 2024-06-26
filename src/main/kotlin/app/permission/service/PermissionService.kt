@@ -1,75 +1,96 @@
 package app.permission.service
 
-import app.permission.model.dto.CreateSnippetInput
-import app.permission.model.dto.ShareSnippetInput
-import app.permission.model.dto.SnippetOutput
-import app.permission.model.enums.PermissionTypeInput
-import app.permission.persistance.entity.Snippet
-import app.permission.persistance.entity.SnippetShare
-import app.permission.persistance.repository.SnippetRepository
-import app.permission.persistance.repository.SnippetShareRepository
+import app.permission.exception.PermissionTypeNotFound
+import app.permission.exception.UserAlreadyHasPermission
+import app.permission.model.dto.CreatePermissionInput
+import app.permission.model.dto.PermissionListOutput
+import app.permission.model.dto.PermissionOutput
+import app.permission.persistance.entity.Permission
+import app.permission.persistance.repository.PermissionRepository
+import app.permission.persistance.repository.PermissionTypeRepository
+import jakarta.transaction.Transactional
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 
 @Service
-class PermissionService(
-    @Autowired val snippetRepository: SnippetRepository,
-    @Autowired val snippetShareRepository: SnippetShareRepository,
-) {
-    fun createSnippet(input: CreateSnippetInput) {
-        if (snippetKeyExists(input.snippetKey!!)) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Snippet with snippet key ${input.snippetKey} already exists",
+class PermissionService
+    @Autowired
+    constructor(
+        private val permissionRepository: PermissionRepository,
+        private val permissionTypeRepository: PermissionTypeRepository,
+    ) {
+        private val logger = LoggerFactory.getLogger(PermissionService::class.java)
+
+        fun createPermission(input: CreatePermissionInput) {
+            logger.info(
+                "Request received for creating permission for user with id: ${input.userId} and snippet with id: ${input.snippetId}",
             )
-        }
-        snippetRepository.save(Snippet(input.name!!, input.snippetKey, input.userId!!))
-    }
-
-    fun shareSnippet(input: ShareSnippetInput) {
-        val snippet = snippetRepository.findBySnippetKey(input.snippetKey!!)
-        val shares = input.userIds.stream().map { SnippetShare(it, snippet) }.toList()
-
-        snippetShareRepository.saveAll(shares)
-    }
-
-    fun getAllSnippets(
-        userId: String,
-        permissionTypeInput: PermissionTypeInput?,
-    ): List<SnippetOutput> {
-        val permissionType = permissionTypeInput ?: PermissionTypeInput.ALL
-
-        val snippets: List<SnippetOutput> =
-            when (permissionType) {
-                PermissionTypeInput.OWNED -> {
-                    getOwnedSnippets(userId)
-                }
-
-                PermissionTypeInput.SHARED -> {
-                    getSharedSnippets(userId)
-                }
-
-                PermissionTypeInput.ALL -> {
-                    getOwnedSnippets(userId) + getSharedSnippets(userId)
-                }
+            if (hasPermissionForSnippet(input.userId!!, input.snippetId!!)) {
+                logger.error("User with id: ${input.userId} already has permission for snippet with id: ${input.snippetId}")
+                throw UserAlreadyHasPermission()
             }
 
-        return snippets
-    }
+            val type = permissionTypeRepository.findByType(input.permissionType)
 
-    private fun getOwnedSnippets(userId: String): List<SnippetOutput> {
-        val snippets = snippetRepository.findAllByUserId(userId)
-        return snippets.stream().map { SnippetOutput(it.name, it.snippetKey) }.toList()
-    }
+            if (type.isEmpty) {
+                logger.error("Permission type with type: ${input.permissionType} not found")
+                throw PermissionTypeNotFound()
+            }
 
-    private fun getSharedSnippets(userId: String): List<SnippetOutput> {
-        val snippets = snippetShareRepository.findAllSharedSnippetsByUserId(userId)
-        return snippets.stream().map { SnippetOutput(it.name, it.snippetKey) }.toList()
-    }
+            permissionRepository.save(
+                Permission(
+                    input.snippetId,
+                    input.userId,
+                    type.get(),
+                ),
+            )
+            logger.info("Permission created for user with id: ${input.userId} and snippet with id: ${input.snippetId}")
+        }
 
-    private fun snippetKeyExists(snippetKey: String): Boolean {
-        return snippetRepository.existsBySnippetKey(snippetKey)
+        fun getAllUserPermissions(
+            userId: String,
+            pageNum: Int,
+            pageSize: Int,
+        ): PermissionListOutput {
+            logger.info("Request received for getting all permissions for user with id: $userId")
+            val pagination = PageRequest.of(pageNum, pageSize)
+            val permissionEntities = permissionRepository.findAllByUserId(userId, pagination)
+            val userPermissionTotalCount = permissionRepository.countAllByUserId(userId)
+
+            val authorType = permissionTypeRepository.findByType("OWNER").get()
+            logger.info("Returning all permissions for user with id: $userId")
+
+            val permissionOutputs =
+                permissionEntities.map {
+                    val authorPermission =
+                        this.permissionRepository.getByPermissionType_TypeAndSnippetId(authorType.type, it.snippetId)
+                    PermissionOutput(it.id!!, it.snippetId, authorPermission.userId, it.permissionType.type)
+                }
+
+            return PermissionListOutput(permissionOutputs, userPermissionTotalCount)
+        }
+
+        private fun hasPermissionForSnippet(
+            userId: String,
+            snippetId: String,
+        ): Boolean {
+            logger.info("Checking if user with id: $userId has permission for snippet with id: $snippetId")
+            val permission = permissionRepository.findByUserIdAndSnippetId(userId, snippetId)
+            return !permission.isEmpty
+        }
+
+        @Transactional
+        fun deleteAllPermissionsForSnippet(snippetId: String) {
+            logger.info("Request received for deleting all permissions for snippet with id: $snippetId")
+            permissionRepository.deleteAllBySnippetId(snippetId)
+        }
+
+        fun getAuthorFromSnippetId(snippetId: String): String {
+            logger.info("Request received for getting author of snippet with id: $snippetId")
+            val authorType = permissionTypeRepository.findByType("OWNER").get()
+            val authorPermission = permissionRepository.getByPermissionType_TypeAndSnippetId(authorType.type, snippetId)
+            return authorPermission.userId
+        }
     }
-}

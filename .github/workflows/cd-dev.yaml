@@ -35,3 +35,21 @@ jobs:
           tags: |
             ghcr.io/ingsis-group-4/snippet-permission-dev:latest
             ghcr.io/ingsis-group-4/snippet-permission-dev:${{ steps.short-sha.outputs.sha }}
+
+          build-args: |
+            ACTOR=${{ github.repository_owner }}
+            TOKEN=${{ secrets.GITHUB_TOKEN }}
+            NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }}
+            NEW_RELIC_APP_NAME=${{ secrets.NEW_RELIC_APP_NAME_DEV }}
+
+      - name: Update server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_URL }}
+          username: "snippet-searcher-admin"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd snippet-infra
+            docker compose -f docker-compose.dev.yml stop snippet-permission
+            docker compose -f docker-compose.dev.yml pull snippet-permission
+            docker compose -f docker-compose.dev.yml up snippet-permission -d --build

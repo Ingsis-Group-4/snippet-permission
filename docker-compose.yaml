@@ -1,10 +1,13 @@
 version: '3'
 services:
   snippet-permission:
-    container_name: "snippet-permission"
+    container_name: "snippet-permissions"
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
+        NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME}
     ports:
       - "8080:8080"
     environment:
@@ -13,6 +16,8 @@ services:
       DB_NAME: ${POSTGRES_DB}
       DB_HOST: postgres
       DB_PORT: 5432
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
+      NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME}
     env_file:
       - .env
     depends_on:
