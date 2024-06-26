@@ -1,10 +1,30 @@
+
 auth0:
   audience: https://snippet-manager
 
 spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:permission-db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+
+  server:
+    error:
+      include-binding-errors: always
+      include-message: always
+
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: https://dev-rwvojcsa8mzfij2d.us.auth0.com/
-
