@@ -6,6 +6,7 @@ import app.permission.persistance.entity.Permission
 import app.permission.persistance.entity.PermissionType
 import app.permission.persistance.repository.PermissionRepository
 import app.permission.persistance.repository.PermissionTypeRepository
+import app.permission.service.PermissionService
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -40,6 +41,9 @@ class PermissionIntegrationTest {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    private lateinit var permissionService: PermissionService
 
     private val base = "/permission"
 
@@ -178,7 +182,6 @@ class PermissionIntegrationTest {
                 "002",
                 TEST_PERMISSION_TYPE,
             )
-//                        .header(HttpHeaders.AUTHORIZATION, "Bearer token")
 
         val requestBody = objectMapper.writeValueAsString(createPermissionRequestBody)
 
@@ -192,7 +195,49 @@ class PermissionIntegrationTest {
         // Execution
         mockMvc.perform(
             get("$base/all?page_num=0&page_size=10")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer token")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token"),
+        ).andExpect(status().is4xxClientError)
+    }
+
+    @Test
+    fun `test 006 _ get user permissions service`() {
+        val createPermissionRequestBody =
+            CreatePermissionInput(
+                "22",
+                "22",
+                AUTHOR_PERMISSION_TYPE,
+            )
+
+        val requestBody = objectMapper.writeValueAsString(createPermissionRequestBody)
+
+        // Execution
+        mockMvc.perform(
+            post("$base/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody),
         ).andExpect(status().isOk)
+
+        permissionService.getAllUserPermissions("22", 0, 10)
+    }
+
+    @Test
+    fun `test 007 _ get author from snippet id`() {
+        val createPermissionRequestBody =
+            CreatePermissionInput(
+                "33",
+                "33",
+                AUTHOR_PERMISSION_TYPE,
+            )
+
+        val requestBody = objectMapper.writeValueAsString(createPermissionRequestBody)
+
+        // Execution
+        mockMvc.perform(
+            post("$base/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody),
+        ).andExpect(status().isOk)
+
+        permissionService.getAuthorFromSnippetId("33")
     }
 }
