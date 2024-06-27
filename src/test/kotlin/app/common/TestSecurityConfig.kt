@@ -31,7 +31,7 @@ class TestSecurityConfig {
     }
 
     companion object {
-        const val AUTH0ID = "test"
+        const val AUTH0ID = "sms|12345678"
         const val AUTH0_TOKEN = "token"
     }
 }
