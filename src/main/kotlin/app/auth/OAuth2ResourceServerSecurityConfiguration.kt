@@ -28,7 +28,6 @@ class OAuth2ResourceServerSecurityConfiguration(
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http.authorizeHttpRequests {
             it
-                .requestMatchers("/").permitAll()
                 .requestMatchers(GET, "/permission/*").hasAuthority("SCOPE_write:snippets")
                 .requestMatchers(POST, "/permission/*").hasAuthority("SCOPE_write:snippets")
                 .anyRequest().authenticated()
